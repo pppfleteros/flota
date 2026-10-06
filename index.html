@@ -16,7 +16,7 @@ header{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18p
 header img{width:40px;height:40px;border-radius:50%;object-fit:cover}
 h1{font-size:22px;font-weight:600;margin:0}
 .sub{color:var(--sub);font-size:13px}
-.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:18px}
+.kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:18px}
 .kpi{border-radius:12px;padding:12px 14px;background:var(--card);border:1px solid var(--borde)}
 .kpi b{display:block;font-size:26px;font-weight:600}
 .kpi span{font-size:13px;color:var(--sub)}
@@ -44,7 +44,7 @@ h1{font-size:22px;font-weight:600;margin:0}
 .leyenda{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--sub);margin:18px 0 0}
 .leyenda i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:0}
 .msg{padding:40px 0;text-align:center;color:var(--sub)}
-@media (max-width:600px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:700px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.kpis .kpi:first-child{grid-column:1/-1}}
 </style>
 </head>
 <body>
@@ -80,7 +80,8 @@ function pintar(d){
     '<div class="kpi"><span>Camionetas</span><b>'+cs.length+'</b></div>'+
     '<div class="kpi verde"><span>Al día</span><b>'+cuenta.verde+'</b></div>'+
     '<div class="kpi amarillo"><span>Por vencer</span><b>'+cuenta.amarillo+'</b></div>'+
-    '<div class="kpi rojo"><span>Vencido</span><b>'+cuenta.rojo+'</b></div>';
+    '<div class="kpi rojo"><span>Vencido</span><b>'+cuenta.rojo+'</b></div>'+
+    '<div class="kpi gris"><span>Faltan datos</span><b>'+cuenta.gris+'</b></div>';
   document.getElementById('grid').innerHTML=cs.map(function(c){
     var s=c.service,v=c.vtv,h='';
     h+='<div class="card '+c.estado+'"><div class="top"><div class="ico">'+VAN+'</div><div><div class="pat">'+esc(c.patente)+'</div>'+
