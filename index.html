@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gestión de flota</title>
+<style>
+:root{--bg:#f4f5f7;--card:#fff;--txt:#1d2127;--sub:#5f6670;--borde:#e3e5e8;
+--rojo:#d64545;--rojo-bg:#fdecec;--amar:#c98a0b;--amar-bg:#fdf4e1;--verde:#2f9e5b;--verde-bg:#e6f5ec;--gris:#8a9099;--gris-bg:#eef0f2;--azul:#2563c9;--azul-bg:#e8effc}
+@media (prefers-color-scheme:dark){:root{--bg:#14171c;--card:#1d2128;--txt:#e9ecef;--sub:#9aa3ad;--borde:#2c313a;
+--rojo:#f07575;--rojo-bg:#3a1f22;--amar:#f0b94a;--amar-bg:#382d17;--verde:#5cc98a;--verde-bg:#1a3326;--gris:#9aa3ad;--gris-bg:#262b33;--azul:#7aa7f5;--azul-bg:#1e2a40}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--txt);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1100px;margin:0 auto;padding:20px 16px 40px}
+header{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+header img{width:40px;height:40px;border-radius:50%;object-fit:cover}
+h1{font-size:22px;font-weight:600;margin:0}
+.sub{color:var(--sub);font-size:13px}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:18px}
+.kpi{border-radius:12px;padding:12px 14px;background:var(--card);border:1px solid var(--borde)}
+.kpi b{display:block;font-size:26px;font-weight:600}
+.kpi span{font-size:13px;color:var(--sub)}
+.kpi.rojo b{color:var(--rojo)}.kpi.amarillo b{color:var(--amar)}.kpi.verde b{color:var(--verde)}.kpi.gris b{color:var(--gris)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--borde);border-top:5px solid var(--gris);border-radius:12px;padding:14px 16px}
+.card.rojo{border-top-color:var(--rojo)}.card.amarillo{border-top-color:var(--amar)}.card.verde{border-top-color:var(--verde)}
+.top{display:flex;align-items:center;gap:10px}
+.ico{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;flex:none}
+.ico svg{width:24px;height:24px}
+.rojo .ico{background:var(--rojo-bg);color:var(--rojo)}.amarillo .ico{background:var(--amar-bg);color:var(--amar)}
+.verde .ico{background:var(--verde-bg);color:var(--verde)}.gris .ico{background:var(--gris-bg);color:var(--gris)}
+.pat{font-weight:600;font-size:16px;letter-spacing:.5px}
+.mod{font-size:13px;color:var(--sub)}
+.item{display:flex;justify-content:space-between;gap:8px;font-size:13.5px;padding:7px 0;border-bottom:1px solid var(--borde)}
+.item:last-of-type{border-bottom:0}
+.item .k{color:var(--sub)}
+.item .v{text-align:right;font-weight:500}
+.v.rojo{color:var(--rojo)}.v.amarillo{color:var(--amar)}.v.verde{color:var(--verde)}.v.gris{color:var(--gris)}
+.lista{margin-top:10px}
+.pill{display:inline-block;font-size:12px;padding:3px 9px;border-radius:999px;margin:8px 6px 0 0}
+.pill.aviso{background:var(--azul-bg);color:var(--azul)}
+.pill.nota{background:var(--amar-bg);color:var(--amar)}
+.pill.sinmail{background:var(--gris-bg);color:var(--sub)}
+.leyenda{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--sub);margin:18px 0 0}
+.leyenda i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:0}
+.msg{padding:40px 0;text-align:center;color:var(--sub)}
+@media (max-width:600px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <img src="https://pppfleteros.github.io/panel/assets/img/logo.jpeg" alt="" onerror="this.remove()">
+    <div>
+      <h1>Gestión de flota</h1>
+      <div class="sub" id="act">Cargando…</div>
+    </div>
+  </header>
+  <div class="kpis" id="kpis"></div>
+  <div class="grid" id="grid"><div class="msg">Cargando las camionetas…</div></div>
+  <div class="leyenda">
+    <span><i style="background:var(--rojo)"></i>Vencido</span>
+    <span><i style="background:var(--amar)"></i>Por vencer (VTV en 30 días o service a menos de <span id="avkm">1.500</span> km)</span>
+    <span><i style="background:var(--verde)"></i>Al día</span>
+    <span><i style="background:var(--gris)"></i>Faltan datos</span>
+  </div>
+</div>
+<script>
+var API = 'https://script.google.com/macros/s/AKfycbx3zPzFnujLTmovdM9ddkImOHcvuWaUWKASN-84aZfzBYFDYeuHjcdlho56iS9S7TgW/exec';
+var VAN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h11v10H3z"/><path d="M14 9h4l3 3v4h-7"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>';
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function miles(n){return n==null?'—':Math.round(n).toLocaleString('es-AR')}
+function pintar(d){
+  document.getElementById('act').textContent='Datos de la planilla al '+d.actualizado+' · service cada '+miles(d.cadaKm)+' km';
+  document.getElementById('avkm').textContent=miles(d.avisoKm);
+  var orden={rojo:0,amarillo:1,gris:2,verde:3}, cuenta={rojo:0,amarillo:0,verde:0,gris:0};
+  var cs=d.camionetas.slice().sort(function(a,b){return orden[a.estado]-orden[b.estado]});
+  cs.forEach(function(c){cuenta[c.estado]++});
+  document.getElementById('kpis').innerHTML=
+    '<div class="kpi"><span>Camionetas</span><b>'+cs.length+'</b></div>'+
+    '<div class="kpi verde"><span>Al día</span><b>'+cuenta.verde+'</b></div>'+
+    '<div class="kpi amarillo"><span>Por vencer</span><b>'+cuenta.amarillo+'</b></div>'+
+    '<div class="kpi rojo"><span>Vencido</span><b>'+cuenta.rojo+'</b></div>';
+  document.getElementById('grid').innerHTML=cs.map(function(c){
+    var s=c.service,v=c.vtv,h='';
+    h+='<div class="card '+c.estado+'"><div class="top"><div class="ico">'+VAN+'</div><div><div class="pat">'+esc(c.patente)+'</div>'+
+       '<div class="mod">'+esc(c.modelo)+(c.anio?' '+esc(c.anio):'')+' · '+esc(c.chofer)+'</div></div></div><div class="lista">';
+    h+='<div class="item"><span class="k">Service</span><span class="v '+s.estado+'">'+esc(s.texto)+'</span></div>';
+    h+='<div class="item"><span class="k">Último service</span><span class="v">'+(s.kmUltimo==null?'—':miles(s.kmUltimo)+' km')+(s.fecha?' · '+esc(s.fecha):'')+'</span></div>';
+    h+='<div class="item"><span class="k">Km actuales</span><span class="v">'+(s.kmActual==null?'—':miles(s.kmActual)+' km')+'</span></div>';
+    h+='<div class="item"><span class="k">VTV</span><span class="v '+v.estado+'">'+esc(v.texto)+'</span></div>';
+    h+='</div>';
+    if(c.nota) h+='<span class="pill nota">'+esc(c.nota)+'</span>';
+    var porQue={};
+    c.avisos.forEach(function(a){(porQue[a.que]=porQue[a.que]||[]).push(a.fecha)});
+    Object.keys(porQue).forEach(function(q){h+='<span class="pill aviso">✉ '+q+': avisado '+porQue[q].join(', ')+'</span>'});
+    if(!c.tieneMail && c.estado!=='verde') h+='<span class="pill sinmail">Sin mail del chofer</span>';
+    return h+'</div>';
+  }).join('');
+}
+fetch(API).then(function(r){return r.json()}).then(pintar).catch(function(){
+  document.getElementById('grid').innerHTML='<div class="msg">No se pudieron leer los datos. Probá recargar en un rato.</div>';
+  document.getElementById('act').textContent='';
+});
+</script>
+</body>
+</html>
