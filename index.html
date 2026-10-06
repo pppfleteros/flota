@@ -25,7 +25,9 @@ h1{font-size:22px;font-weight:600;margin:0}
 .card{background:var(--card);border:1px solid var(--borde);border-top:5px solid var(--gris);border-radius:12px;padding:14px 16px}
 .card.rojo{border-top-color:var(--rojo)}.card.amarillo{border-top-color:var(--amar)}.card.verde{border-top-color:var(--verde)}
 .top{display:flex;align-items:center;gap:10px}
-.ico{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;flex:none}
+.ico{position:relative;width:40px;height:40px;border-radius:10px;display:grid;place-items:center;flex:none}
+.burbuja{position:absolute;top:-7px;right:-7px;min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:#ef4444;color:#fff;
+  font-size:12px;line-height:20px;font-weight:700;text-align:center;box-shadow:0 0 0 2px var(--card)}
 .ico svg{width:24px;height:24px}
 .rojo .ico{background:var(--rojo-bg);color:var(--rojo)}.amarillo .ico{background:var(--amar-bg);color:var(--amar)}
 .verde .ico{background:var(--verde-bg);color:var(--verde)}.gris .ico{background:var(--gris-bg);color:var(--gris)}
@@ -57,7 +59,7 @@ h1{font-size:22px;font-weight:600;margin:0}
     </div>
   </header>
   <div class="kpis" id="kpis"></div>
-  <div class="grid" id="grid"><div class="msg">Cargando las camionetas…</div></div>
+  <div class="grid" id="grid"><div class="msg">Leyendo la planilla… (la primera vez tarda unos segundos)</div></div>
   <div class="leyenda">
     <span><i style="background:var(--rojo)"></i>Vencido</span>
     <span><i style="background:var(--amar)"></i>Por vencer (VTV en 30 días o service a menos de <span id="avkm">1.500</span> km)</span>
@@ -84,7 +86,9 @@ function pintar(d){
     '<div class="kpi gris"><span>Faltan datos</span><b>'+cuenta.gris+'</b></div>';
   document.getElementById('grid').innerHTML=cs.map(function(c){
     var s=c.service,v=c.vtv,h='';
-    h+='<div class="card '+c.estado+'"><div class="top"><div class="ico">'+VAN+'</div><div><div class="pat">'+esc(c.patente)+'</div>'+
+    var venc=(s.estado==='rojo'?1:0)+(v.estado==='rojo'?1:0);
+    var burb=venc?'<span class="burbuja" title="'+venc+(venc===1?' cosa vencida':' cosas vencidas')+'">'+venc+'</span>':'';
+    h+='<div class="card '+c.estado+'"><div class="top"><div class="ico">'+VAN+burb+'</div><div><div class="pat">'+esc(c.patente)+'</div>'+
        '<div class="mod">'+esc(c.modelo)+(c.anio?' '+esc(c.anio):'')+' · '+esc(c.chofer)+'</div></div></div><div class="lista">';
     h+='<div class="item"><span class="k">Service</span><span class="v '+s.estado+'">'+esc(s.texto)+'</span></div>';
     h+='<div class="item"><span class="k">Último service</span><span class="v">'+(s.kmUltimo==null?'—':miles(s.kmUltimo)+' km')+(s.fecha?' · '+esc(s.fecha):'')+'</span></div>';
@@ -99,7 +103,16 @@ function pintar(d){
     return h+'</div>';
   }).join('');
 }
-fetch(API).then(function(r){return r.json()}).then(pintar).catch(function(){
+// Google tarda 2-4 s en responder: se muestra al instante lo último guardado en este navegador
+// y se reemplaza por los datos frescos apenas llegan.
+var GUARDADO='flota-ultimo', previo=null;
+try{previo=JSON.parse(localStorage.getItem(GUARDADO))}catch(e){}
+if(previo){pintar(previo);document.getElementById('act').textContent+=' · actualizando…'}
+fetch(API).then(function(r){return r.json()}).then(function(d){
+  pintar(d);
+  try{localStorage.setItem(GUARDADO,JSON.stringify(d))}catch(e){}
+}).catch(function(){
+  if(previo){document.getElementById('act').textContent=document.getElementById('act').textContent.replace(' · actualizando…',' · no se pudo actualizar');return}
   document.getElementById('grid').innerHTML='<div class="msg">No se pudieron leer los datos. Probá recargar en un rato.</div>';
   document.getElementById('act').textContent='';
 });
