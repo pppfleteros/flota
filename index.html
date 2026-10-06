@@ -62,7 +62,7 @@ h1{font-size:22px;font-weight:600;margin:0}
   <div class="grid" id="grid"><div class="msg">Leyendo la planilla… (la primera vez tarda unos segundos)</div></div>
   <div class="leyenda">
     <span><i style="background:var(--rojo)"></i>Vencido</span>
-    <span><i style="background:var(--amar)"></i>Por vencer (VTV en 30 días o service a menos de <span id="avkm">1.500</span> km)</span>
+    <span><i style="background:var(--amar)"></i>Por vencer (VTV en 30 días, o service o cubiertas a menos de <span id="avkm">1.500</span> km)</span>
     <span><i style="background:var(--verde)"></i>Al día</span>
     <span><i style="background:var(--gris)"></i>Faltan datos</span>
   </div>
@@ -73,7 +73,7 @@ var VAN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-wid
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
 function miles(n){return n==null?'—':Math.round(n).toLocaleString('es-AR')}
 function pintar(d){
-  document.getElementById('act').textContent='Datos de la planilla al '+d.actualizado+' · service cada '+miles(d.cadaKm)+' km';
+  document.getElementById('act').textContent='Datos de la planilla al '+d.actualizado+' · service cada '+miles(d.cadaKm)+' km'+(d.cubiertasKm?' · cubiertas cada '+miles(d.cubiertasKm)+' km':'');
   document.getElementById('avkm').textContent=miles(d.avisoKm);
   var orden={rojo:0,amarillo:1,gris:2,verde:3}, cuenta={rojo:0,amarillo:0,verde:0,gris:0};
   var cs=d.camionetas.slice().sort(function(a,b){return orden[a.estado]-orden[b.estado]});
@@ -86,13 +86,16 @@ function pintar(d){
     '<div class="kpi gris"><span>Faltan datos</span><b>'+cuenta.gris+'</b></div>';
   document.getElementById('grid').innerHTML=cs.map(function(c){
     var s=c.service,v=c.vtv,h='';
-    var venc=(s.estado==='rojo'?1:0)+(v.estado==='rojo'?1:0);
+    var cu=c.cubiertas||{estado:'gris',texto:'—'};
+    var venc=(s.estado==='rojo'?1:0)+(cu.estado==='rojo'?1:0)+(v.estado==='rojo'?1:0);
     var burb=venc?'<span class="burbuja" title="'+venc+(venc===1?' cosa vencida':' cosas vencidas')+'">'+venc+'</span>':'';
     h+='<div class="card '+c.estado+'"><div class="top"><div class="ico">'+VAN+burb+'</div><div><div class="pat">'+esc(c.patente)+'</div>'+
        '<div class="mod">'+esc(c.modelo)+(c.anio?' '+esc(c.anio):'')+' · '+esc(c.chofer)+'</div></div></div><div class="lista">';
+    h+='<div class="item"><span class="k">Km actuales</span><span class="v">'+(s.kmActual==null?'—':miles(s.kmActual)+' km')+'</span></div>';
     h+='<div class="item"><span class="k">Service</span><span class="v '+s.estado+'">'+esc(s.texto)+'</span></div>';
     h+='<div class="item"><span class="k">Último service</span><span class="v">'+(s.kmUltimo==null?'—':miles(s.kmUltimo)+' km')+(s.fecha?' · '+esc(s.fecha):'')+'</span></div>';
-    h+='<div class="item"><span class="k">Km actuales</span><span class="v">'+(s.kmActual==null?'—':miles(s.kmActual)+' km')+'</span></div>';
+    h+='<div class="item"><span class="k">Cubiertas</span><span class="v '+cu.estado+'">'+esc(cu.texto)+'</span></div>';
+    h+='<div class="item"><span class="k">Último cambio</span><span class="v">'+(cu.kmUltimo==null?'—':miles(cu.kmUltimo)+' km')+(cu.fecha?' · '+esc(cu.fecha):'')+'</span></div>';
     h+='<div class="item"><span class="k">VTV</span><span class="v '+v.estado+'">'+esc(v.texto)+'</span></div>';
     h+='</div>';
     if(c.nota) h+='<span class="pill nota">'+esc(c.nota)+'</span>';
