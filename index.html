@@ -35,7 +35,7 @@ h1{font-size:22px;font-weight:600;margin:0}
 .mod{font-size:13px;color:var(--sub)}
 .item{display:flex;justify-content:space-between;gap:8px;font-size:13.5px;padding:7px 0;border-bottom:1px solid var(--borde)}
 .item:last-of-type{border-bottom:0}
-.item .k{color:var(--sub)}
+.item .k{color:var(--sub);white-space:nowrap}
 .item .v{text-align:right;font-weight:500}
 .v.rojo{color:var(--rojo)}.v.amarillo{color:var(--amar)}.v.verde{color:var(--verde)}.v.gris{color:var(--gris)}
 .lista{margin-top:10px}
@@ -95,7 +95,7 @@ function pintar(d){
     h+='<div class="item"><span class="k">Service</span><span class="v '+s.estado+'">'+esc(s.texto)+'</span></div>';
     h+='<div class="item"><span class="k">Último service</span><span class="v">'+(s.kmUltimo==null?'—':miles(s.kmUltimo)+' km')+(s.fecha?' · '+esc(s.fecha):'')+'</span></div>';
     h+='<div class="item"><span class="k">Cubiertas</span><span class="v '+cu.estado+'">'+esc(cu.texto)+'</span></div>';
-    h+='<div class="item"><span class="k">Último cambio</span><span class="v">'+(cu.kmUltimo==null?'—':miles(cu.kmUltimo)+' km')+(cu.fecha?' · '+esc(cu.fecha):'')+'</span></div>';
+    h+='<div class="item"><span class="k">Último cambio cubiertas</span><span class="v">'+(cu.kmUltimo==null?'—':miles(cu.kmUltimo)+' km')+(cu.fecha?' · '+esc(cu.fecha):'')+'</span></div>';
     h+='<div class="item"><span class="k">VTV</span><span class="v '+v.estado+'">'+esc(v.texto)+'</span></div>';
     h+='</div>';
     if(c.nota) h+='<span class="pill nota">'+esc(c.nota)+'</span>';
