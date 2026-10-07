@@ -95,7 +95,7 @@ function pintar(d){
     h+='<div class="item"><span class="k">Service</span><span class="v '+s.estado+'">'+esc(s.texto)+'</span></div>';
     h+='<div class="item"><span class="k">Último service</span><span class="v">'+(s.kmUltimo==null?'—':miles(s.kmUltimo)+' km')+(s.fecha?' · '+esc(s.fecha):'')+'</span></div>';
     h+='<div class="item"><span class="k">Cubiertas</span><span class="v '+cu.estado+'">'+esc(cu.texto)+'</span></div>';
-    h+='<div class="item"><span class="k">Último cambio</span><span class="v">'+(cu.kmUltimo==null?'—':miles(cu.kmUltimo)+' km')+(cu.fecha?' · '+esc(cu.fecha):'')+'</span></div>';
+    h+='<div class="item"><span class="k">Último cambio</span><span class="v">'+(cu.sinCambio?'Sin cambios · 1º a los '+miles(cu.proximo!=null?cu.proximo:50000)+' km':cu.kmUltimo==null?'—':miles(cu.kmUltimo)+' km')+(cu.fecha?' · '+esc(cu.fecha):'')+'</span></div>';
     h+='<div class="item"><span class="k">VTV</span><span class="v '+v.estado+'">'+esc(v.texto)+'</span></div>';
     h+='</div>';
     if(c.nota) h+='<span class="pill nota">'+esc(c.nota)+'</span>';
